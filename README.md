@@ -1,4 +1,20 @@
 # SI_Arsip_Surat_Desa_Karangduren
+Berfungsi untuk mempermudah pengarsipan surat di Desa Karangduren, hal ini juga mempermudah Desa Karangduren dalam penyimpanan surat sehingga tidak memerlukan rak untuk penyimpanan surat
+
+# Cara Pemakaian
+1. Masuk ke link tersebut https://arsip.safeguard-idn.com/
+2. Pilih bar menu Kategori Surat untuk melakukan create, edit, dan delete
+3. Setelah di halaman kategori Surat pilih button create untuk membuat kategori, pilih baris sesuai kategori yang ingin diedit untuk melakukan perubahan data, dan pilih tombol sampah untuk hapus kategori
+4. Untuk tambah kategori silahkan isi formulir dan pilih create untuk menyimpan data kategori tersebut
+5. Untuk edit kategori silahkan ubah data yang ingin diubah dan pilih save untuk menyimpan perubahan
+6. Untuk hapus kategori silah pilih yes ketika dimintakan persetujuan
+7. Pilih bar menu Arsip Surat untuk melakukan create, edit, dan delete
+3. Setelah di halaman Arsip Surat pilih button create untuk menambahkan arsip, pilih baris sesuai arsip yang ingin diedit untuk melakukan perubahan data, pilih tombol mata untuk melihat file surat, pilih tombol download untuk mengunduh surat, dan pilih tombol sampah untuk hapus arsip
+4. Untuk tambah arsip silahkan isi formulir dan pilih create untuk menyimpan data surat tersebut
+5. Untuk edit arsip silahkan ubah data yang ingin diubah dan pilih save untuk menyimpan perubahan
+6. Setelah memilih show arsip maka akan menampilkan data surat dan file pdf
+7. Setelah memilih download arsip maka file akan mulai diunduh
+8. Untuk hapus surat silah pilih yes ketika dimintakan persetujuan
 
 A. Tampilan about
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d15820f8-fccb-454a-b00c-acf55bc80042" />
