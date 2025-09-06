@@ -7,6 +7,7 @@ use Livewire\Attributes\Rule;
 use App\Models\Kategori;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 new class extends Component {
     use Toast, WithFileUploads;
@@ -16,10 +17,10 @@ new class extends Component {
     #[Rule('required')]
     public string $judul = '';
 
-    #[Rule('required')]
+    #[Rule('required')] // placeholder, akan di-set di mount
     public string $no_surat = '';
 
-    #[Rule('required|date')]
+    #[Rule('required|date_format:Y-m-d\TH:i')]
     public string $tanggal = '';
 
     #[Rule('sometimes')]
@@ -31,6 +32,8 @@ new class extends Component {
     public function mount(Arsip $arsip): void
     {
         $this->arsip = $arsip;
+
+        // Set value untuk edit
         $this->judul = $arsip->judul;
         $this->no_surat = $arsip->no_surat;
         $this->tanggal = Carbon::parse($arsip->tanggal)->format('Y-m-d\TH:i');
@@ -41,6 +44,7 @@ new class extends Component {
     {
         // Validate
         $data = $this->validate();
+
         $this->arsip->update([
             'judul' => $this->judul,
             'no_surat' => $this->no_surat,
@@ -48,16 +52,19 @@ new class extends Component {
             'kategori_id' => $this->kategori_id,
         ]);
 
+        // Update file jika ada
         if ($this->file) {
-            if ($this->arsip->file && Storage::disk('public')->exists(str_replace('/storage/', '', $this->arsip->file))) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $this->arsip->file));
+            // Hapus file lama
+            if ($this->arsip->file && Storage::disk('public')->exists($this->arsip->file)) {
+                Storage::disk('public')->delete($this->arsip->file);
             }
+
+            // Simpan file baru
             $url = $this->file->store('arsip', 'public');
-            $this->arsip->update(['file' => "/storage/$url"]);
+            $this->arsip->update(['file' => $url]); // simpan relative path
         }
 
-        // You can toast and redirect to any route
-        $this->success('Arsip updated with success.', redirectTo: '/surat');
+        $this->success('Arsip berhasil diupdate.', redirectTo: '/surat');
     }
 
     public function with(): array
@@ -66,16 +73,17 @@ new class extends Component {
             'kategori' => Kategori::all(),
         ];
     }
-}; ?>
+};
+?>
 
 <div>
     <x-header title="Update Surat {{ $this->arsip->judul }}" separator />
 
     <x-form wire:submit="save">
-        {{--  Basic section  --}}
+        {{-- Basic section --}}
         <div class="lg:grid grid-cols-5">
             <div class="col-span-2">
-                <x-header title="Basic" subtitle="Basic info from arsip" size="text-2xl" />
+                <x-header title="Basic" subtitle="Basic info dari arsip" size="text-2xl" />
             </div>
             <div class="col-span-3 grid gap-3">
                 <x-input label="No Surat" wire:model="no_surat" />
@@ -84,12 +92,12 @@ new class extends Component {
             </div>
         </div>
 
-        {{--  Details section --}}
         <hr class="my-5" />
 
+        {{-- Details section --}}
         <div class="lg:grid grid-cols-5">
             <div class="col-span-2">
-                <x-header title="Details" subtitle="More about the arsip" size="text-2xl" />
+                <x-header title="Details" subtitle="Detail tambahan dari arsip" size="text-2xl" />
             </div>
             <div class="col-span-3 grid gap-3">
                 <x-select label="Kategori Surat" wire:model="kategori_id" :options="$kategori" placeholder="---" />
@@ -99,9 +107,7 @@ new class extends Component {
 
         <x-slot:actions>
             <x-button label="Cancel" link="/surat" />
-            {{-- The important thing here is `type="submit"` --}}
-            {{-- The spinner property is nice! --}}
-            <x-button label="Create" icon="o-paper-airplane" spinner="save" type="submit" class="btn-primary" />
+            <x-button label="Update" icon="o-paper-airplane" spinner="save" type="submit" class="btn-primary" />
         </x-slot:actions>
     </x-form>
 </div>

@@ -19,13 +19,13 @@ new class extends Component {
     #[Rule('required|unique:arsips,no_surat')]
     public string $no_surat = '';
 
-    #[Rule('required|date')]
+    #[Rule('required|date_format:Y-m-d\TH:i')]
     public string $tanggal = '';
 
     #[Rule('sometimes')]
     public ?int $kategori_id = null;
 
-    #[Rule('mimes:pdf|max:10240')]
+    #[Rule('nullable|mimes:pdf|max:10240')]
     public $file;
 
     public function mount(): void
@@ -35,21 +35,25 @@ new class extends Component {
 
     public function save(): void
     {
-        // Validate
+        // Validasi input
         $data = $this->validate();
-        // Pastikan tanggal tetap pakai timezone Jakarta
+        // dd($data);
+
+        // Pastikan tanggal pakai timezone Jakarta
         $data['tanggal'] = Carbon::parse($this->tanggal, 'Asia/Jakarta');
 
-        // Create arsip
+        // Buat arsip baru
         $arsip = Arsip::create($data);
 
+        // Simpan file kalau ada
         if ($this->file) {
             $url = $this->file->store('arsip', 'public');
-            $arsip->update(['file' => "/storage/$url"]);
+            // Simpan hanya relative path (contoh: arsip/surat123.pdf)
+            $arsip->update(['file' => $url]);
         }
 
-        // You can toast and redirect to any route
-        $this->success('Arsip created with success.', redirectTo: '/surat');
+        // Beri notifikasi & redirect
+        $this->success('Arsip berhasil dibuat.', redirectTo: '/surat');
     }
 
     public function with(): array
@@ -58,16 +62,17 @@ new class extends Component {
             'kategori' => Kategori::all(),
         ];
     }
-}; ?>
+};
+?>
 
 <div>
     <x-header title="Pengarsipan Surat" separator />
 
     <x-form wire:submit="save">
-        {{--  Basic section  --}}
+        {{-- Basic section --}}
         <div class="lg:grid grid-cols-5">
             <div class="col-span-2">
-                <x-header title="Basic" subtitle="Basic info from arsip" size="text-2xl" />
+                <x-header title="Basic" subtitle="Basic info dari arsip" size="text-2xl" />
             </div>
             <div class="col-span-3 grid gap-3">
                 <x-input label="No Surat" wire:model="no_surat" />
@@ -76,23 +81,21 @@ new class extends Component {
             </div>
         </div>
 
-        {{--  Details section --}}
+        {{-- Details section --}}
         <hr class="my-5" />
 
         <div class="lg:grid grid-cols-5">
             <div class="col-span-2">
-                <x-header title="Details" subtitle="More about the arsip" size="text-2xl" />
+                <x-header title="Details" subtitle="Detail tambahan dari arsip" size="text-2xl" />
             </div>
             <div class="col-span-3 grid gap-3">
                 <x-select label="Kategori Surat" wire:model="kategori_id" :options="$kategori" placeholder="---" />
-                <x-file label="File Surat" hint="Only PDF" wire:model="file" accept="application/pdf" ></x-file>
+                <x-file label="File Surat" hint="Only PDF" wire:model="file" accept="application/pdf" />
             </div>
         </div>
 
         <x-slot:actions>
             <x-button label="Cancel" link="/surat" />
-            {{-- The important thing here is `type="submit"` --}}
-            {{-- The spinner property is nice! --}}
             <x-button label="Create" icon="o-paper-airplane" spinner="save" type="submit" class="btn-primary" />
         </x-slot:actions>
     </x-form>

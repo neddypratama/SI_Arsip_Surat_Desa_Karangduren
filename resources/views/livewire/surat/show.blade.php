@@ -4,6 +4,7 @@ use App\Models\Arsip;
 use App\Models\Kategori;
 use Livewire\Volt\Component;
 use Mary\Traits\Toast;
+use Illuminate\Support\Facades\Storage;
 
 new class extends Component {
     use Toast;
@@ -13,14 +14,16 @@ new class extends Component {
 
     public function mount(Arsip $arsip): void
     {
-        // Assign model
         $this->arsip = $arsip;
-
-        // Ambil URL PDF publik
-        if ($arsip->file && file_exists(public_path($arsip->file))) {
-            $this->pdfUrl = asset($arsip->file);
+    
+        if ($arsip->file) {
+            if (Storage::disk('public')->exists($arsip->file)) {
+                $this->pdfUrl = Storage::url($arsip->file);
+            } else {
+                $this->error("File tidak ditemukan di path: {$arsip->file}", position: 'toast-bottom');
+            }
         } else {
-            $this->error('File PDF tidak ditemukan.', position: 'toast-bottom');
+            $this->error('Tidak ada file terkait arsip ini.', position: 'toast-bottom');
         }
     }
 
@@ -33,6 +36,7 @@ new class extends Component {
     }
 };
 ?>
+
 <div class="p-5">
     <!-- HEADER -->
     <x-header title="Detail Surat" separator />
@@ -45,6 +49,7 @@ new class extends Component {
                 <p><strong>Judul:</strong> {{ $arsip->judul }}</p>
                 <p><strong>Kategori:</strong> {{ $arsip->kategori->name ?? '-' }}</p>
                 <p><strong>Tanggal:</strong> {{ $arsip->tanggal }}</p>
+                
             </x-card>
         </div>
 
@@ -53,7 +58,6 @@ new class extends Component {
             @if ($pdfUrl)
                 <div class="w-full h-[90vh] border rounded-lg shadow">
                     <iframe src="{{ $pdfUrl }}" width="100%" height="100%" frameborder="0"></iframe>
-                    <p>{{ $pdfUrl }}</p>
                 </div>
             @else
                 <x-card shadow>
